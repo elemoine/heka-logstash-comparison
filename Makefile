@@ -13,26 +13,33 @@ build-heka:
 	docker build -t elemoine/lma_collector
 
 .PHONY: run-heka
-run-heka:
-	mkdir -p output
+heka: output
 	docker run -it --rm --name="heka" -v $(PWD)/heka.conf:/config-dir/heka.conf -v $(PWD)/logs:/logs -v $(PWD)/output:/output elemoine/lma-collector -config=/config-dir/heka.conf
 
-.PHONY: run-elasticsearch
-nun-elasticsearch:
+.PHONY: elasticsearch
+elasticsearch:
 	 docker run --rm -it --name="elasticsearch" elasticsearch
 
-.PHONY: run-logstash
-run-logstash:
-	mkdir -p output
+.PHONY: logstash
+logstash: output
 	docker run -it --rm -u="root" --name="logstash" -v $(PWD)/logstash.conf:/config-dir/logstash.conf -v $(PWD)/logs:/logs -v $(PWD)/output:/output logstash logstash -f /config-dir/logstash.conf
 
-.PHONY: stats-heka
-stats-heka:
+.PHONY: heka-stats
+heka-stats:
 	docker stats heka
 
-.PHONY: stats-logstash
-stats-logstash:
+.PHONY: logstash-stats
+logstash-stats:
 	docker stats logstash
+
+.PHONY: output
+output:
+	mkdir -p output
+	chmod a+w output
+
+.PHONY: watch-output
+watch-output:
+	/usr/bin/time watch wc -l output/logs
 
 .build/$(HEKA_DEB):
 	mkdir -p $(dir $@)
@@ -41,6 +48,7 @@ stats-logstash:
 logs/kern1.log:
 	mkdir -p $(dir $@)
 	for i in $$(seq 1 500); do cp kern.log logs/kern$${i}.log; done
+	chmod -R a+r $(dir $@)
 
 .PHONY: clean
 clean:
