@@ -1,4 +1,5 @@
 HEKA_DEB = heka_0.10.0_amd64.deb
+NUM_LOG_FILES = 100
 
 PWD = $(shell pwd)
 
@@ -47,7 +48,7 @@ watch-output:
 
 logs/kern1.log:
 	mkdir -p $(dir $@)
-	for i in $$(seq 1 500); do cp kern.log logs/kern$${i}.log; done
+	for i in $$(seq 1 $(NUM_LOG_FILES)); do cp kern.log logs/kern$${i}.log; done
 	chmod -R a+r $(dir $@)
 
 .PHONY: clean
